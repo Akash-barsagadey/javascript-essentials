@@ -1,5 +1,10 @@
 const sum = require('./es6/sum')
+import _ from '../node_modules/lodash'
 
-const total = sum(25, 5);
+window._ = _
 
-console.log('total',total)
+const total = sum(25, 5)
+
+console.log('Hiiiiiiiiiii')
+
+console.log('total', total)
