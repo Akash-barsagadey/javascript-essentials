@@ -7,4 +7,6 @@ const app = express()
 
 app.use(webpackMiddleware(webpack(webpackConfig)))
 
+//app.use(express.static('dist'))
+
 app.listen(3050, () => console.log('Listening'))
