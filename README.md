@@ -105,3 +105,10 @@ Run this command to get a full list of the options available:
 ```sh
 surge --help
 ```
+
+## Author
+
+👤 **Akash Barsagadey**
+
+-   Github: [@Akash-barsagadey](https://github.com/Akash-barsagadey)
+-   LinkedIn: [@akash-barsagadey](https://linkedin.com/in/akash-barsagadey)
