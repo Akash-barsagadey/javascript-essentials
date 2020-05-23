@@ -22,4 +22,6 @@ function symmetricDifference(a1, a2) {
 	return result
 }
 
-console.log('diff2', symmetricDifference(arrayFirst, arraySecond)) //Output:["1", "3", "4", "5", "7", "8", "9"]
+console.log('diff2', symmetricDifference(arrayFirst, arraySecond))
+
+//Above all have Output:["1", "3", "4", "5", "7", "8", "9"]

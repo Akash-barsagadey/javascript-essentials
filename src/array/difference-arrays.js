@@ -1,4 +1,5 @@
 import { difference } from 'lodash'
+
 let arrayFirst = ['1', '2', '3', '4', '5']
 let arraySecond = ['7', '8', '9', '2']
 
@@ -17,4 +18,6 @@ let difference4 = arrayFirst.filter((x) => !arraySecond.some((y) => y === x))
 // by lodash
 let difference5 = difference(arrayFirst, arraySecond)
 
-console.log('difference4', difference5) //Above all have Output: ["1", "3", "4", "5"]
+console.log('difference4', difference5)
+
+//Above all have Output: ["1", "3", "4", "5"]
