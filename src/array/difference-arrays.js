@@ -1,4 +1,8 @@
 import { difference } from 'lodash'
+import _ from 'lodash'
+
+// for use of lodash in console
+window._ = _
 
 let arrayFirst = ['1', '2', '3', '4', '5']
 let arraySecond = ['7', '8', '9', '2']

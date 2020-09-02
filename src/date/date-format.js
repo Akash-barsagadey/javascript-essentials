@@ -1,6 +1,7 @@
 import moment from 'moment'
-
+import dayjs from 'dayjs'
 window.moment = moment
+window.dayjs = dayjs
 
 ///Local react native  project without Chrome debugging: Invalid date
 // Local react native  project with Chrome debugging: correct date
