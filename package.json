@@ -6,6 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "server": "webpack-dev-server",
+    "locales-pull-js": "node src/core/phraseapp/getLangDataFromPhraseapp.js",
+    "prestart2": "run-s cleanup locales-pull-js",
     "build": "rm -rf build && webpack"
   },
   "repository": {

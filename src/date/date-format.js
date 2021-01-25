@@ -12,11 +12,16 @@ let newDate = new Date('2020-05-21 00:43:38'.replace(' ', 'T'))
 
 // OR
 
-console.log('cureent Date>>>>>>>>>', moment().format('YYYY-MM-DDTHH:mm:ss'))
+export const dateFormat = 'YYYY-MM-DDTHH:mm:ss'
+
+console.log('cureent Date>>>>>>>>>', moment().format(dateFormat))
+
+//add 5 days
+var new_date = moment().add(5, 'd').format('YYYY-MM-DDTHH:mm:ss')
 
 // there are plenty of alternatives out there:
 
-/* 
+/*
 
 Day.js
 Luxon

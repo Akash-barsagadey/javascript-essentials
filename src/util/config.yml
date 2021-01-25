@@ -1,0 +1,160 @@
+version: 2.1
+orbs:
+  # aws-s3: circleci/aws-s3@1.0.16
+  aws-cli: circleci/aws-cli@1.2.1
+
+commands:
+  copy-to-s3:
+    steps:
+      - run: aws s3 --profile ${CIRCLE_BRANCH} cp ~/repo/build s3://${CIRCLE_BRANCH}-project_name-fe --recursive --include "*"
+  # Unused
+  install_aws_cmd:
+    steps:
+      - run:
+          name: Install AWS CLI
+          command: |
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o ~/awscliv2.zip
+            unzip -q ~/awscliv2.zip -d ~
+            sudo ~/aws/install
+  aws-profiles:
+    steps:
+      - run: npx @githubrepo/acp --file aws/profiles.yml
+      - run: cat ~/.aws/config
+      - run: printenv
+
+jobs:
+  phraseapp:
+    docker:
+      - image: circleci/node:12.9.1-browsers
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run:
+          name: Install phraseapp and sync branch
+          command: |
+            sudo wget -O phrase https://github.com/phrase/phrase-cli/releases/download/2.0.13/phrase_linux_amd64
+            sudo chmod +x phrase
+            sudo cp phrase /usr/local/bin/
+            bash ./scripts/phraseapp_merge_locale.sh ${CIRCLE_BRANCH}
+            echo 'translations synced'
+  build:
+    docker:
+      - image: circleci/node:12.9.1-browsers
+    resource_class: large
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/repo
+      - aws-profiles
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "package.json" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+      - run:
+          name: project_name Production build
+          command: |
+            export NODE_ENV=${CIRCLE_BRANCH}
+            NODE_ENV=${CIRCLE_BRANCH} npm install
+            npm run locales-pull-js
+            ~/repo/node_modules/.bin/env-cmd -f ./.env.${CIRCLE_BRANCH} npm run build
+      - store_artifacts:
+          path: /home/circleci/repo/.npm/_logs
+          destination: logs
+      - save_cache:
+          paths:
+            - node_modules
+            - ~/.npm
+            - ~/.cache
+          key: v1-dependencies-{{ checksum "package.json" }}
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+  test:
+    docker:
+      - image: circleci/node:10.13.0-browsers
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - aws-profiles
+      - run:
+          name: Test
+          command: |
+            echo Test build
+
+  deploy:
+    parameters:
+      bucket_suffix:
+        type: string
+    docker:
+      - image: circleci/node:10.13.0-browsers
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/repo
+      - aws-profiles
+      - install_aws_cmd
+      - copy-to-s3
+      # - aws-s3/copy:
+      #     arguments: |
+      #       --recursive \
+      #       --include "*"
+      #     from: ~/repo/build
+      #     #to: s3://project_name-fe<< parameters.bucket_suffix >>
+      #     to: s3://<< parameters.bucket_suffix >>project_name-fe
+      # - run:
+      #     name: Invalidate CloudFront Cache
+      #     command: |
+      #       CF_DISTRIBUTION="CF_DISTRIBUTION_${CIRCLE_BRANCH^^}"
+      #       aws cloudfront create-invalidation --distribution-id "${!CF_DISTRIBUTION}" --paths "/*"
+
+workflows:
+  version: 2
+  build-test-and-deploy:
+    jobs:
+      # - phraseapp:
+      #     filters:
+      #       branches:
+      #         only:
+      #           - master
+      #           - staging
+      #           - qa
+      - build:
+          context: project_name-cicd
+          filters:
+            branches:
+              only:
+                - master
+                - staging
+                - qa
+                - dev
+      # - test:
+      #     requires:
+      #       - build
+      - deploy:
+          #bucket_suffix: -qa
+          bucket_suffix: qa-
+          context: project_name-cicd
+          filters:
+            branches:
+              only:
+                - staging
+                - qa
+          requires:
+            - build
+          # requires:
+          #   - test
+      - deploy: # <<< A job that will require manual approval
+          #bucket_suffix: ''
+          bucket_suffix: dev-
+          context: project_name-cicd
+          filters:
+            branches:
+              only:
+                - master
+                - dev
+          requires:
+            - build
