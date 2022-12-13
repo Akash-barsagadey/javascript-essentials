@@ -34,7 +34,7 @@
   "dependencies": {
     "akash-react-npm-boilerplate": "^1.0.1",
     "dayjs": "^1.8.34",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "moment": "^2.26.0"
   }
 }
